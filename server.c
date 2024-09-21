@@ -30,7 +30,6 @@ typedef struct {
 } t_receiver;
 
 
-
 void ft_sigusr1_hndlr(int sig) {
 	printf("FT SIGUSR1!\n");
 }
@@ -39,11 +38,14 @@ void ft_sigusr2_hndlr(int sig) {
 	printf("FT SIGUSR2!\n");
 }
 
+t_receiver state;
+
 int main(void) {
-	//Q: why such type is needed at all? why not to use just long?
 
 	//Q: from man pid_t: where the width of pid_t is  no  greater  than  the width of the type longl
 	// why width? what is width? size?
+
+	//Q: why such type is needed at all? why not to use just long?
 	pid_t	pid;
 
 	pid = getpid();
