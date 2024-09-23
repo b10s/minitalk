@@ -6,6 +6,34 @@
 
 void rcv_bit(int val);
 void clean_state();
+void DumpHex(const void* data, size_t size) {
+	char ascii[17];
+	size_t i, j;
+	ascii[16] = '\0';
+	for (i = 0; i < size; ++i) {
+		printf("%02X ", ((unsigned char*)data)[i]);
+		if (((unsigned char*)data)[i] >= ' ' && ((unsigned char*)data)[i] <= '~') {
+			ascii[i % 16] = ((unsigned char*)data)[i];
+		} else {
+			ascii[i % 16] = '.';
+		}
+		if ((i+1) % 8 == 0 || i+1 == size) {
+			printf(" ");
+			if ((i+1) % 16 == 0) {
+				printf("|  %s \n", ascii);
+			} else if (i+1 == size) {
+				ascii[(i+1) % 16] = '\0';
+				if ((i+1) % 16 <= 8) {
+					printf(" ");
+				}
+				for (j = (i+1) % 16; j < 16; ++j) {
+					printf("   ");
+				}
+				printf("|  %s \n", ascii);
+			}
+		}
+	}
+}
 
 //TODO: replace printf to mine
 
@@ -80,15 +108,17 @@ void act(int bit) {
 			if (state.byte == state.size) {
 				// finished receiving msg
 				state.bit = 0;
-				state.byte = 0;
 				state.msg[state.byte] = '\0';
+				state.byte = 0;
 				printf("received msg: [%s]\n", state.msg);
 				write(1, state.msg, state.size);
 				clean_state();
 			}
-		// neither
+		// not receiveing msg, not receiving size
+		// impossible!
 		} else {
 		}
+	// in not receiving anything state, sleeping (pausing)
 	} else {
 		printf("started receiving\n");
 		state.tx = 1;
@@ -101,6 +131,7 @@ void act(int bit) {
 // 1. err detection - too big size, or some unexpected data coming
 // 2. there delay in transmission, e.g. 500 us no signals (how to detect such delay?)
 void clean_state() {
+	printf("cleaning state\n");
 	state.size = 0;
 	if (state.msg != NULL) {
 		free(state.msg);
@@ -110,6 +141,7 @@ void clean_state() {
 	state.bit = 0;
 	state.rx_msg = 0;
 	state.rx_size = 0;
+	state.tx = 0;
 }
 // 0 - as is; 1 - 256; 2 - 65536; 3 - 16777216
 
