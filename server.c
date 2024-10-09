@@ -3,37 +3,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <stdlib.h>
-
-void rcv_bit(int val);
-void clean_state();
-void DumpHex(const void* data, size_t size) {
-	char ascii[17];
-	size_t i, j;
-	ascii[16] = '\0';
-	for (i = 0; i < size; ++i) {
-		printf("%02X ", ((unsigned char*)data)[i]);
-		if (((unsigned char*)data)[i] >= ' ' && ((unsigned char*)data)[i] <= '~') {
-			ascii[i % 16] = ((unsigned char*)data)[i];
-		} else {
-			ascii[i % 16] = '.';
-		}
-		if ((i+1) % 8 == 0 || i+1 == size) {
-			printf(" ");
-			if ((i+1) % 16 == 0) {
-				printf("|  %s \n", ascii);
-			} else if (i+1 == size) {
-				ascii[(i+1) % 16] = '\0';
-				if ((i+1) % 16 <= 8) {
-					printf(" ");
-				}
-				for (j = (i+1) % 16; j < 16; ++j) {
-					printf("   ");
-				}
-				printf("|  %s \n", ascii);
-			}
-		}
-	}
-}
+#include "./server.h"
 
 //TODO: replace printf to mine
 
@@ -55,21 +25,53 @@ void DumpHex(const void* data, size_t size) {
 // test on Mac and Linux
 
 // move to header file
-typedef struct {
-	int is_receiving;
-	int size;
-	char *msg;
-	int offset;
-	int cur_byte;
-	int test;
-	int byte;
-	int bit;
-	int tx;
-	int rx_size;
-	int rx_msg;
-} t_receiver;
 
 t_receiver state;
+
+int main(void) {
+	// we start receiving from 0th byte and 0th bit
+	state.byte = 0;
+	state.bit = 0;
+	state.cur_byte = 0;
+	state.msg = NULL;
+	state.is_receiving = 0;
+
+	//Q: from man pid_t: where the width of pid_t is  no  greater  than  the width of the type longl
+	// why width? what is width? size?
+
+	//Q: why such type is needed at all? why not to use just long?
+	pid_t	pid;
+
+	pid = getpid();
+	printf("PID: [%d]\n", pid);
+	// what is it? link to function?
+	// check what is returned? SIG_DFT or SOG_IGN?
+	struct sigaction act_usr1;
+	struct sigaction act_usr2;
+
+	// what sa standf for? signal action?
+	// why i do that? maybe i need ignore something?
+	sigemptyset(&act_usr1.sa_mask);
+	act_usr1.sa_sigaction = ft_sigusr1_hndlr;
+	act_usr1.sa_flags = SA_SIGINFO;
+
+	sigemptyset(&act_usr2.sa_mask);
+	act_usr2.sa_sigaction = ft_sigusr2_hndlr;
+	act_usr2.sa_flags = SA_SIGINFO;
+	//oldHandler = signal(SIGUSR1, ft_sigusr1_hndlr);
+	//TODO check for ret err
+	sigaction(SIGUSR1, &act_usr1, NULL);
+	//if (oldHandler == SIG_ERR)
+		//return (1);
+	//oldHandler = signal(SIGUSR2, ft_sigusr2_hndlr);
+	sigaction(SIGUSR2, &act_usr2, NULL);
+	//if (oldHandler == SIG_ERR)
+		//return (1);
+	for (;;){
+		// where to use sleep and pause?
+		usleep(500);
+	}
+}
 
 void act(int bit) {
 	// if transmission ongoing
@@ -82,7 +84,7 @@ void act(int bit) {
 				state.bit = 0;
 				state.size = state.size + state.cur_byte * (1<<(8*state.byte));
 				state.byte++;
-				printf("cur b: [%d]\n", state.cur_byte);
+				//printf("cur b: [%d]\n", state.cur_byte);
 				state.cur_byte = 0;
 			}
 			if (state.byte == sizeof(int)) {
@@ -102,7 +104,7 @@ void act(int bit) {
 				state.bit = 0;
 				state.msg[state.byte] = state.cur_byte;
 				state.byte++;
-				printf("cur b: [%d]\n", state.cur_byte);
+				//printf("cur b: [%d]\n", state.cur_byte);
 				state.cur_byte = 0;
 			}
 			if (state.byte == state.size) {
@@ -151,44 +153,24 @@ void rcv_bit(int val) {
 }
 
 
-void ft_sigusr1_hndlr() {
-	//printf("FT SIGUSR1! [%d]\n", sig);
+//TODO: if pid is not good, we finish work with error
+void ft_sigusr1_hndlr(int sig, siginfo_t *info, void *ucontext) {
+	(void)ucontext;
+	(void)sig;
+	//printf("FT SIGUSR1! [%d] from pid [%d]\n", sig, info->si_pid);
 	act(1);
+	//printf("kill from usr1 handler\n");
+	kill(info->si_pid, SIGUSR1);
+	//printf("killed from usr1 handler\n");
 }
 
-void ft_sigusr2_hndlr() {
-	//printf("FT SIGUSR2! [%d]\n", sig);
+void ft_sigusr2_hndlr(int sig, siginfo_t *info, void *ucontext) {
+	//printf("FT SIGUSR2! [%d] from pid [%d]\n", sig, info->si_pid);
+	(void)sig;
+	(void)ucontext;
 	act(0);
+	//printf("kill from usr2 handler\n");
+	kill(info->si_pid, SIGUSR1);
+	//printf("killed from usr2 handler\n");
 }
 
-
-
-int main(void) {
-	// we start receiving from 0th byte and 0th bit
-	state.byte = 0;
-	state.bit = 0;
-	state.cur_byte = 0;
-	state.msg = NULL;
-	state.is_receiving = 0;
-
-	//Q: from man pid_t: where the width of pid_t is  no  greater  than  the width of the type longl
-	// why width? what is width? size?
-
-	//Q: why such type is needed at all? why not to use just long?
-	pid_t	pid;
-
-	pid = getpid();
-	printf("PID: [%d]\n", pid);
-	// what is it? link to function?
-	void (*oldHandler)(int); 
-	// check what is returned? SIG_DFT or SOG_IGN?
-	oldHandler = signal(SIGUSR1, ft_sigusr1_hndlr);
-	if (oldHandler == SIG_ERR)
-		return (1);
-	oldHandler = signal(SIGUSR2, ft_sigusr2_hndlr);
-	if (oldHandler == SIG_ERR)
-		return (1);
-	for (;;){
-		usleep(500);
-	}
-}

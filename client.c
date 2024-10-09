@@ -4,82 +4,39 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#include "./client.h"
 
-//TODO: replace printf to mine
-void DumpHex(const void* data, size_t size) {
-	char ascii[17];
-	size_t i, j;
-	ascii[16] = '\0';
-	for (i = 0; i < size; ++i) {
-		printf("%02X ", ((unsigned char*)data)[i]);
-		if (((unsigned char*)data)[i] >= ' ' && ((unsigned char*)data)[i] <= '~') {
-			ascii[i % 16] = ((unsigned char*)data)[i];
-		} else {
-			ascii[i % 16] = '.';
-		}
-		if ((i+1) % 8 == 0 || i+1 == size) {
-			printf(" ");
-			if ((i+1) % 16 == 0) {
-				printf("|  %s \n", ascii);
-			} else if (i+1 == size) {
-				ascii[(i+1) % 16] = '\0';
-				if ((i+1) % 16 <= 8) {
-					printf(" ");
-				}
-				for (j = (i+1) % 16; j < 16; ++j) {
-					printf("   ");
-				}
-				printf("|  %s \n", ascii);
-			}
-		}
-	}
-}
 
-void displayBits(unsigned char value) {
-	unsigned char displayMask = 1 << 7;
-	printf("%10d = ", value);
-	for (unsigned char c = 1; c <= 8; ++c) {
-		putchar(value & displayMask ? '1' : '0');
-		value <<=1;
-	}
-	putchar('\n');
-}
-
-void send_byte(int pid, unsigned char b) {
-	for (short bit = 0; bit < 8; bit++) {
-		if (1<<bit & b) {
-			// send bit 1
-			kill(pid, SIGUSR1);
-		} else {
-			// send bit 0
-			kill(pid, SIGUSR2);
-		}
-		usleep(100);
-	}
-}
-
+// rewrite to use my own printf without buffering control and see if issue still here
 int main(int argc,char** argv) {
 	printf("hi from client\n");
-
-
 	//char *unic = "あアあ";
-
-
 	if (argc !=3) {
 		//ERR
 		printf("not enough arguments\n");
 		return 0;
 	}
-
 	int pid = atoi(argv[1]);
 	char *str = argv[2];
-
-
 	int to_send = strlen(str);
-	//printf("unic len: [%d]\n", to_send);
+	printf("string to send len: [%d]\n", to_send);
 	//printf("unic [%s]\n", unic);
 	//write(1, unic, to_send);
 	//write(1, "\n", 1);
+
+	// set dummy handler to cause pause to return
+	//signal(SIGUSR1, ack_handler);
+	struct sigaction act_ack;
+
+	// what sa standf for? signal action?
+	// why i do that? maybe i need ignore something?
+	sigemptyset(&act_ack.sa_mask);
+	act_ack.sa_handler = ack_handler;
+	act_ack.sa_flags = SA_RESTART;
+
+	//oldHandler = signal(SIGUSR1, ft_sigusr1_hndlr);
+	//TODO check for ret err
+	sigaction(SIGUSR1, &act_ack, NULL);
 
 	for (unsigned long byte = 0; byte < sizeof(int); byte++) {
 		int x = (to_send >> (8*byte)) & 0xff;
@@ -90,13 +47,14 @@ int main(int argc,char** argv) {
 		}
 	}
 
+	//oldHandler = signal(SIGUSR2, ft_sigusr2_hndlr);
+
 	for (int i = 0; i < to_send; i++){
 		// TODO sendstr with NUL byte
-		//printf("sending byte [%c]\n", unic[i]);
+		//printf("sending byte [#%d: %c]\n", i, str[i]);
 		send_byte(pid, str[i]);
 		//displayBits(str[i]);
 	}
-
 	//char b;
 
 	/*
@@ -134,6 +92,31 @@ int main(int argc,char** argv) {
 	//sleep(1234);
 }
 
-//void ft_sigusr1_hndlr(int sig) {
-	//printf("FT SIGUSR1!\n");
-//}
+void send_byte(int pid, unsigned char b) {
+	//printf("sending byte\n");
+	for (short bit = 0; bit < 8; bit++) {
+		if (1<<bit & b) {
+			// send bit 1
+			kill(pid, SIGUSR1);
+		} else {
+			// send bit 0
+			kill(pid, SIGUSR2);
+		}
+		// wait till ACK from server
+		//printf("pausing..\n");
+		pause();
+		//printf("morning!\n");
+		//usleep(800);
+
+		// when I use 100 on my local PC it sometimes not enough
+		// 1 second has 1 000 000 microseconds
+		// even 900 is not enough: it fails on 
+		// while true; do ./client $(pidof server) "привет как дела"; done
+		// TODO: check how other people done here
+		//usleep(300);
+	}
+}
+
+void ack_handler() {
+	//printf("ACK\n");
+}
