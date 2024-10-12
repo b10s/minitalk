@@ -6,14 +6,17 @@
 /*   By: aenshin <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/12 21:50:20 by aenshin           #+#    #+#             */
-/*   Updated: 2024/10/12 21:50:21 by aenshin          ###   ########.fr       */
+/*   Updated: 2024/10/12 21:56:17 by aenshin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <signal.h>
-#include <stdlib.h>
+#ifndef SERVER_H
+# define SERVER_H
+
+# include <unistd.h>
+# include <sys/types.h>
+# include <signal.h>
+# include <stdlib.h>
 
 size_t	ft_strlen(const char *s);
 char	*ft_itoa(int n);
@@ -44,3 +47,4 @@ typedef struct receiver
 	int		client_pid;
 	int		res;
 }	t_receiver;
+#endif
