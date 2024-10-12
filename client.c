@@ -38,24 +38,31 @@ void	send_msg(char *msg, int pid)
 	byte = 0;
 	while (byte < sizeof(int))
 	{
-		x = (msg_size >> (8*byte)) & 0xff;
+		x = (msg_size >> (8 * byte)) & 0xff;
 		b = x;
 		send_byte(pid, b);
 		byte++;
 	}
-	for (i = 0; i < msg_size; i++)
-		send_byte(pid, msg[i]);
+	i = 0;
+	while (i < msg_size)
+		send_byte(pid, msg[i++]);
 }
 
-void send_byte(int pid, unsigned char b) {
-	int signal;
-	for (short bit = 0; bit < 8; bit++) {
-		if (1<<bit & b)
+void	send_byte(int pid, unsigned char b)
+{
+	int		signal;
+	short	bit;
+
+	bit = 0;
+	while (bit < 8)
+	{
+		if (1 << bit & b)
 			signal = SIGUSR1;
 		else
 			signal = SIGUSR2;
 		kill(pid, signal);
 		sleep(1);
+		bit++;
 	}
 }
 
