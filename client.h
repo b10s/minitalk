@@ -1,4 +1,10 @@
-//TODO put other includes here
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+
 void send_byte(int pid, unsigned char b);
 void ack_handler();
 void err_handler();

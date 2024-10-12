@@ -54,29 +54,29 @@ int act(int bit) {
 }
 
 int rcv_size(int bit) {
-			rcv_bit(bit);
-			if (state.bit == 8) {
-				state.bit = 0;
-				state.size = state.size + state.cur_byte * (1<<(8*state.byte));
-				state.byte++;
-				state.cur_byte = 0;
-			}
-			if (state.byte == sizeof(int)) {
-				state.bit = 0;
-				state.byte = 0;
-				state.rx_size = 0;
-				state.rx_msg = 1;
-				state.msg = malloc(state.size + 1);
-				if (state.msg == NULL) {
-					clean_state();
-					return 1;
-				}
-			}
-			if (state.size < 0) {
-				clean_state();
-				return 1;
-			}
-			return 0;
+	rcv_bit(bit);
+	if (state.bit == 8) {
+		state.bit = 0;
+		state.size = state.size + state.cur_byte * (1<<(8*state.byte));
+		state.byte++;
+		state.cur_byte = 0;
+	}
+	if (state.byte == sizeof(int)) {
+		state.bit = 0;
+		state.byte = 0;
+		state.rx_size = 0;
+		state.rx_msg = 1;
+		state.msg = malloc(state.size + 1);
+		if (state.msg == NULL) {
+			clean_state();
+			return 1;
+		}
+	}
+	if (state.size < 0) {
+		clean_state();
+		return 1;
+	}
+	return 0;
 }
 
 void rcv_bit(int val) {
