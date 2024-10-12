@@ -13,6 +13,7 @@ void clean_state();
 void rcv_bit(int val);
 void clean_state_since_to();
 void err(char *msg);
+int rcv_size(int bit);
 
 
 //TODO remove unsued fields
