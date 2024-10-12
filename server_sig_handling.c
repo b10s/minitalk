@@ -42,6 +42,7 @@ int act(int bit) {
 				state.msg[state.byte] = '\0';
 				state.byte = 0;
 				write(1, state.msg, state.size);
+				write(1, "\n", 1);
 				clean_state();
 			}
 		}
