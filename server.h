@@ -8,12 +8,14 @@ void rcv_bit(int val);
 void clean_state();
 void ft_sigusr1_hndlr();
 void ft_sigusr2_hndlr();
-void act(int bit);
+int act(int bit);
 void clean_state();
 void rcv_bit(int val);
 void clean_state_since_to();
+void err(char *msg);
 
 
+//TODO remove unsued fields
 typedef struct {
 	int size;
 	char *msg;
@@ -26,5 +28,4 @@ typedef struct {
 	int rx_size;
 	int rx_msg;
 	int client_pid;
-	int received_bit;
 } t_receiver;
