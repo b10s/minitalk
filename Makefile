@@ -6,7 +6,7 @@ all: server client
 
 # what are explicit targets like .o .c?
 client:
-	$(CC) $(CFLAGS)	client.c common.c -o client
+	$(CC) $(CFLAGS)	client.c common.c ft_atoi.c -o client
 
 server:
 	$(CC) $(CFLAGS)	server.c server_sig_handling.c common.c -o server

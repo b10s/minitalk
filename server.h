@@ -16,6 +16,7 @@ void err(char *msg);
 int rcv_size(int bit);
 size_t ft_strlen(const char *s);
 char * ft_itoa(int n);
+void set_sig_handlers();
 
 
 //TODO remove unsued fields

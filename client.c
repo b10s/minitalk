@@ -8,8 +8,7 @@ int main(int argc,char** argv) {
 
 	if (argc != 3)
 		err("not enough arguments");
-	// TODO replace with mine atoi, libft
-	pid = atoi(argv[1]);
+	pid = ft_atoi(argv[1]);
 	msg = argv[2];
 	if (sigemptyset(&usr1_handler.sa_mask) != 0)
 		err("error to set up client\n");
@@ -33,8 +32,7 @@ void send_msg(char *msg, int pid) {
 	int msg_size;
 	int i;
 
-	// TODO replace with mine strlen, libft
-	msg_size = strlen(msg);
+	msg_size = ft_strlen(msg);
 
 	for (byte = 0; byte < sizeof(int); byte++) {
 		x = (msg_size >> (8*byte)) & 0xff;
