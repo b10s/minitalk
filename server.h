@@ -25,5 +25,5 @@ typedef struct {
 	int tx;
 	int rx_size;
 	int rx_msg;
-	int flg;
+	int client_pid;
 } t_receiver;

@@ -63,28 +63,11 @@ int main(void) {
 	sigemptyset(&usr2_handler.sa_mask);
 	usr2_handler.sa_sigaction = ft_sigusr2_hndlr;
 	usr2_handler.sa_flags = SA_SIGINFO;
-	//oldHandler = signal(SIGUSR1, ft_sigusr1_hndlr);
 	//TODO check for ret err
 	sigaction(SIGUSR1, &usr1_handler, NULL);
-	//if (oldHandler == SIG_ERR)
-		//return (1);
-	//oldHandler = signal(SIGUSR2, ft_sigusr2_hndlr);
 	sigaction(SIGUSR2, &usr2_handler, NULL);
-	//if (oldHandler == SIG_ERR)
-		//return (1);
 	for (;;){
-		// where to use sleep and pause?
-		//printf("inf loop; just paused - waiting for signals\n");
-
 		pause();
-		/*
-		state.flg = 1;
-		usleep(500000);
-		if (state.flg == 1) {
-			clean_state_since_to();
-			//printf("transmission aborted in the middle\n");
-		}
-		*/
 	}
 }
 
@@ -145,20 +128,6 @@ void act(int bit) {
 	}
 }
 
-void clean_state_since_to() {
-	printf("yebabo\n");
-	state.size = 0;
-	if (state.msg != NULL) {
-		free(state.msg);
-		state.msg = NULL;
-	}
-	state.byte = 0;
-	state.bit = 0;
-	state.rx_msg = 0;
-	state.rx_size = 0;
-	state.tx = 0;
-}
-
 // how to clean state correctly?
 // 1. err detection - too big size, or some unexpected data coming
 // 2. there delay in transmission, e.g. 500 us no signals (how to detect such delay?)
@@ -185,8 +154,7 @@ void rcv_bit(int val) {
 
 //TODO: if pid is not good, we finish work with error
 void ft_sigusr1_hndlr(int sig, siginfo_t *info, void *ucontext) {
-	state.flg = 0;
-	sleep(0.1);
+	sleep(0);
 	// just to not WARN on cc with flags - these args are not used
 	(void)ucontext;
 	(void)sig;
@@ -198,8 +166,8 @@ void ft_sigusr1_hndlr(int sig, siginfo_t *info, void *ucontext) {
 }
 
 void ft_sigusr2_hndlr(int sig, siginfo_t *info, void *ucontext) {
-	state.flg = 0;
-	sleep(0.1);
+	state.client_pid = info->si_pid;
+	sleep(0);
 	//printf("FT SIGUSR2! [%d] from pid [%d]\n", sig, info->si_pid);
 	(void)sig;
 	(void)ucontext;
