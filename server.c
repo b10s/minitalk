@@ -42,8 +42,9 @@ void	set_sig_handlers(void)
 		err("error to set up server\n");
 }
 
-void	clean_state(void)
+void	clean_state(int res)
 {
+	g_state.res = res;
 	g_state.size = 0;
 	if (g_state.msg != NULL)
 	{
@@ -55,4 +56,10 @@ void	clean_state(void)
 	g_state.rx_msg = 0;
 	g_state.rx_size = 0;
 	g_state.tx = 0;
+}
+
+void	rcv_bit(int val)
+{
+	g_state.cur_byte = g_state.cur_byte | val << g_state.bit;
+	g_state.bit++;
 }
