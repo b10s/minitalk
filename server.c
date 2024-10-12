@@ -1,15 +1,15 @@
 #include "./server.h"
 
-t_receiver state;
+t_receiver	g_state;
 
 int main(void) {
 	pid_t	pid;
 	char *pid_str;
 
-	state.byte = 0;
-	state.bit = 0;
-	state.cur_byte = 0;
-	state.msg = NULL;
+	g_state.byte = 0;
+	g_state.bit = 0;
+	g_state.cur_byte = 0;
+	g_state.msg = NULL;
 	pid = getpid();
 	pid_str = ft_itoa(pid);
 	if (pid_str == NULL)
@@ -41,15 +41,15 @@ void set_sig_handlers() {
 }
 
 void clean_state() {
-	state.size = 0;
-	if (state.msg != NULL) {
-		free(state.msg);
-		state.msg = NULL;
+	g_state.size = 0;
+	if (g_state.msg != NULL) {
+		free(g_state.msg);
+		g_state.msg = NULL;
 	}
-	state.byte = 0;
-	state.bit = 0;
-	state.rx_msg = 0;
-	state.rx_size = 0;
-	state.tx = 0;
+	g_state.byte = 0;
+	g_state.bit = 0;
+	g_state.rx_msg = 0;
+	g_state.rx_size = 0;
+	g_state.tx = 0;
 }
 
