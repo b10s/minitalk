@@ -9,49 +9,46 @@
 int main(int argc,char** argv) {
 	int pid;
 	char *msg;
-	int msg_size;
 	struct sigaction usr1_handler;
 	struct sigaction usr2_handler;
-	int i;
 
 	if (argc != 3)
 		err("not enough arguments");
 	// TODO replace with mine atoi, libft
 	pid = atoi(argv[1]);
 	msg = argv[2];
-	// TODO replace with mine strlen, libft
-	msg_size = strlen(msg);
-
-	//TODO err handling
-	sigemptyset(&usr1_handler.sa_mask);
+	if (sigemptyset(&usr1_handler.sa_mask) != 0)
+		err("error to set up client");
 	usr1_handler.sa_flags = SA_RESTART;
 	usr1_handler.sa_handler = ack_handler;
-
-	//TODO err handling
-	sigemptyset(&usr2_handler.sa_mask);
+	if (sigemptyset(&usr2_handler.sa_mask) != 0)
+		err("error to set up client");
 	usr2_handler.sa_flags = SA_RESTART;
 	usr2_handler.sa_handler = err_handler;
-
-	//TODO check for ret err
-	sigaction(SIGUSR1, &usr1_handler, NULL);
-	//TODO err handling
-	sigaction(SIGUSR2, &usr2_handler, NULL);
-
-	send_size(msg_size, pid);
-	for (i = 0; i < msg_size; i++)
-		send_byte(pid, msg[i]);
+	if (sigaction(SIGUSR1, &usr1_handler, NULL) != 0)
+		err("error to set up client");
+	if (sigaction(SIGUSR2, &usr2_handler, NULL) != 0)
+		err("error to set up client");
+	send_msg(msg, pid);
 }
 
-void send_size(int msg_size, int pid) {
+void send_msg(char *msg, int pid) {
 	unsigned long byte;
 	int x;
 	unsigned char b;
+	int msg_size;
+	int i;
+
+	// TODO replace with mine strlen, libft
+	msg_size = strlen(msg);
 
 	for (byte = 0; byte < sizeof(int); byte++) {
 		x = (msg_size >> (8*byte)) & 0xff;
 		b = x;
 		send_byte(pid, b);
 	}
+	for (i = 0; i < msg_size; i++)
+		send_byte(pid, msg[i]);
 }
 
 void send_byte(int pid, unsigned char b) {
