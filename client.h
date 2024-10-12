@@ -5,8 +5,8 @@
 #include <string.h>
 
 void	send_byte(int pid, unsigned char b);
-void	ack_handler(void);
-void	err_handler(void);
+void	ack_handler(int);
+void	err_handler(int);
 void	err(char *msg);
 void	send_msg(char *msg, int pid);
 size_t	ft_strlen(const char *s);

@@ -66,12 +66,12 @@ void	send_byte(int pid, unsigned char b)
 	}
 }
 
-void	ack_handler(void)
+void	ack_handler(int)
 {
 	sleep(0);
 }
 
-void	err_handler(void)
+void	err_handler(int)
 {
 	sleep(0);
 	err("server responded with err\n");
