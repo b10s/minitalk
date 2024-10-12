@@ -17,3 +17,5 @@ clean:
 fclean: clean
 	rm -rf client server
 
+bonus: all
+
