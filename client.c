@@ -7,18 +7,20 @@
 #include "./client.h"
 
 int main(int argc,char** argv) {
-	if (argc != 3) {
-		//TODO replace with mine printf
-		printf("not enough arguments\n");
-		return 0;
-	}
-	// TODO replace with mine atoi, libft
-	int pid = atoi(argv[1]);
-	char *str = argv[2];
-	// TODO replace with mine strlen, libft
-	int to_send = strlen(str);
+	int pid;
+	char *msg;
+	int msg_size;
 	struct sigaction usr1_handler;
 	struct sigaction usr2_handler;
+	int i;
+
+	if (argc != 3)
+		err("not enough arguments");
+	// TODO replace with mine atoi, libft
+	pid = atoi(argv[1]);
+	msg = argv[2];
+	// TODO replace with mine strlen, libft
+	msg_size = strlen(msg);
 
 	//TODO err handling
 	sigemptyset(&usr1_handler.sa_mask);
@@ -35,13 +37,21 @@ int main(int argc,char** argv) {
 	//TODO err handling
 	sigaction(SIGUSR2, &usr2_handler, NULL);
 
-	for (unsigned long byte = 0; byte < sizeof(int); byte++) {
-		int x = (to_send >> (8*byte)) & 0xff;
-		unsigned char b = x;
+	send_size(msg_size, pid);
+	for (i = 0; i < msg_size; i++)
+		send_byte(pid, msg[i]);
+}
+
+void send_size(int msg_size, int pid) {
+	unsigned long byte;
+	int x;
+	unsigned char b;
+
+	for (byte = 0; byte < sizeof(int); byte++) {
+		x = (msg_size >> (8*byte)) & 0xff;
+		b = x;
 		send_byte(pid, b);
 	}
-	for (int i = 0; i < to_send; i++)
-		send_byte(pid, str[i]);
 }
 
 void send_byte(int pid, unsigned char b) {
@@ -62,8 +72,6 @@ void ack_handler() {
 
 void err_handler() {
 	sleep(0);
-	//TODO replace with mine printf or use write
-	printf("oops\n");
-	exit(1);
+	err("server responded with err");
 }
 

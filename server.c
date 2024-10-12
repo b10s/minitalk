@@ -20,24 +20,32 @@ int main(void) {
 	//TODO: replace with my printf or so
 	printf("PID: [%d]\n", pid);
 	if (sigemptyset(&usr1_handler.sa_mask) !=0 )
-		err("error to set up server\n");
+		err("error to set up server");
 	usr1_handler.sa_sigaction = ft_sigusr1_hndlr;
 	usr1_handler.sa_flags = SA_SIGINFO;
 	if (sigemptyset(&usr2_handler.sa_mask) != 0)
-		err("error to set up server\n");
+		err("error to set up server");
 	usr2_handler.sa_sigaction = ft_sigusr2_hndlr;
 	usr2_handler.sa_flags = SA_SIGINFO | SA_RESTART;
 	if (sigaction(SIGUSR1, &usr1_handler, NULL) != 0)
-		err("error to set up server\n");
+		err("error to set up server");
 	if (sigaction(SIGUSR2, &usr2_handler, NULL) != 0)
-		err("error to set up server\n");
+		err("error to set up server");
 	for (;;)
 		pause();
 	return 0;
 }
 
-void err(char *msg) {
-	printf("err: [%s]\n", msg);
-	exit(1);
+void clean_state() {
+	state.size = 0;
+	if (state.msg != NULL) {
+		free(state.msg);
+		state.msg = NULL;
+	}
+	state.byte = 0;
+	state.bit = 0;
+	state.rx_msg = 0;
+	state.rx_size = 0;
+	state.tx = 0;
 }
 

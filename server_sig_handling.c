@@ -79,19 +79,6 @@ int rcv_size(int bit) {
 			return 0;
 }
 
-void clean_state() {
-	state.size = 0;
-	if (state.msg != NULL) {
-		free(state.msg);
-		state.msg = NULL;
-	}
-	state.byte = 0;
-	state.bit = 0;
-	state.rx_msg = 0;
-	state.rx_size = 0;
-	state.tx = 0;
-}
-
 void rcv_bit(int val) {
 	state.cur_byte = state.cur_byte | val<<state.bit;
 	state.bit++;
