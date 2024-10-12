@@ -8,6 +8,9 @@ all: server client
 client:
 	$(CC) $(CFLAGS)	client.c client_helper.c -o client
 
+#server:
+	#$(CC) $(CFLAGS)	server.c server_rcv.c -o server
+
 re: fclean all
 
 fclean:

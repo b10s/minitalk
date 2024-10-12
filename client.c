@@ -7,6 +7,11 @@
 #include "./client.h"
 
 
+//TODO: implement two types of ACKs;
+// 1. when signal is received and processed without issues
+// 2. when error is detected, so client should stop trans,ission and say error
+
+
 // rewrite to use my own printf without buffering control and see if issue still here
 int main(int argc,char** argv) {
 	printf("hi from client\n");
@@ -26,25 +31,25 @@ int main(int argc,char** argv) {
 
 	// set dummy handler to cause pause to return
 	//signal(SIGUSR1, ack_handler);
-	struct sigaction act_ack;
+	struct sigaction usr1_handler;
 
 	// what sa standf for? signal action?
 	// why i do that? maybe i need ignore something?
-	sigemptyset(&act_ack.sa_mask);
-	act_ack.sa_handler = ack_handler;
-	act_ack.sa_flags = SA_RESTART;
+	sigemptyset(&usr1_handler.sa_mask);
+	usr1_handler.sa_handler = ack_handler;
+	usr1_handler.sa_flags = 0;
 
 	//oldHandler = signal(SIGUSR1, ft_sigusr1_hndlr);
 	//TODO check for ret err
-	sigaction(SIGUSR1, &act_ack, NULL);
+	sigaction(SIGUSR1, &usr1_handler, NULL);
 
 	for (unsigned long byte = 0; byte < sizeof(int); byte++) {
 		int x = (to_send >> (8*byte)) & 0xff;
 		unsigned char b = x;
 		send_byte(pid, b);
-		for (int bit = 0; bit < 8; bit++) {
-			printf("byte: [%lu] bit: [%d]\n", byte, bit);
-		}
+		//for (int bit = 0; bit < 8; bit++) {
+			//printf("byte: [%lu] bit: [%d]\n", byte, bit);
+		//}
 	}
 
 	//oldHandler = signal(SIGUSR2, ft_sigusr2_hndlr);
@@ -104,7 +109,9 @@ void send_byte(int pid, unsigned char b) {
 		}
 		// wait till ACK from server
 		//printf("pausing..\n");
-		pause();
+		// lol kek, sometimes I'm receiving signal here in between
+		//sleep(2);
+		//usleep(300);
 		//printf("morning!\n");
 		//usleep(800);
 
@@ -114,9 +121,11 @@ void send_byte(int pid, unsigned char b) {
 		// while true; do ./client $(pidof server) "привет как дела"; done
 		// TODO: check how other people done here
 		//usleep(300);
+		sleep(1);
 	}
 }
 
 void ack_handler() {
 	//printf("ACK\n");
+	sleep(0.1);
 }

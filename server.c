@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include "./server.h"
 
-//TODO: replace printf to mine
+//TODO: if more than size received - say err
+//TODO: use SA_RESTART in both sides
 
+//TODO: replace printf to mine
 
 // make gloabl struct which init
 // transmission is in progress yes/no
@@ -24,8 +26,10 @@
 // there is no transimissions in parallel?
 // test on Mac and Linux
 
-// move to header file
+//TODO: make sleep and clean up if not signal for 700 usec or so
 
+
+// global variable to keep state
 t_receiver state;
 
 int main(void) {
@@ -34,7 +38,6 @@ int main(void) {
 	state.bit = 0;
 	state.cur_byte = 0;
 	state.msg = NULL;
-	state.is_receiving = 0;
 
 	//Q: from man pid_t: where the width of pid_t is  no  greater  than  the width of the type longl
 	// why width? what is width? size?
@@ -46,30 +49,42 @@ int main(void) {
 	printf("PID: [%d]\n", pid);
 	// what is it? link to function?
 	// check what is returned? SIG_DFT or SOG_IGN?
-	struct sigaction act_usr1;
-	struct sigaction act_usr2;
+	struct sigaction usr1_handler;
+	struct sigaction usr2_handler;
 
 	// what sa standf for? signal action?
 	// why i do that? maybe i need ignore something?
-	sigemptyset(&act_usr1.sa_mask);
-	act_usr1.sa_sigaction = ft_sigusr1_hndlr;
-	act_usr1.sa_flags = SA_SIGINFO;
+	sigemptyset(&usr1_handler.sa_mask);
+	usr1_handler.sa_sigaction = ft_sigusr1_hndlr;
+	// to get more details: who sent signal and do ACK on it
+	// that is why SA_SIGINFO is needed
+	usr1_handler.sa_flags = SA_SIGINFO;
 
-	sigemptyset(&act_usr2.sa_mask);
-	act_usr2.sa_sigaction = ft_sigusr2_hndlr;
-	act_usr2.sa_flags = SA_SIGINFO;
+	sigemptyset(&usr2_handler.sa_mask);
+	usr2_handler.sa_sigaction = ft_sigusr2_hndlr;
+	usr2_handler.sa_flags = SA_SIGINFO;
 	//oldHandler = signal(SIGUSR1, ft_sigusr1_hndlr);
 	//TODO check for ret err
-	sigaction(SIGUSR1, &act_usr1, NULL);
+	sigaction(SIGUSR1, &usr1_handler, NULL);
 	//if (oldHandler == SIG_ERR)
 		//return (1);
 	//oldHandler = signal(SIGUSR2, ft_sigusr2_hndlr);
-	sigaction(SIGUSR2, &act_usr2, NULL);
+	sigaction(SIGUSR2, &usr2_handler, NULL);
 	//if (oldHandler == SIG_ERR)
 		//return (1);
 	for (;;){
 		// where to use sleep and pause?
-		usleep(500);
+		//printf("inf loop; just paused - waiting for signals\n");
+
+		pause();
+		/*
+		state.flg = 1;
+		usleep(500000);
+		if (state.flg == 1) {
+			clean_state_since_to();
+			//printf("transmission aborted in the middle\n");
+		}
+		*/
 	}
 }
 
@@ -122,11 +137,26 @@ void act(int bit) {
 		}
 	// in not receiving anything state, sleeping (pausing)
 	} else {
-		printf("started receiving\n");
+		printf("First received signal for this session! started receiving\n");
+		clean_state();
 		state.tx = 1;
 		state.rx_size = 1;
 		rcv_bit(bit);
 	}
+}
+
+void clean_state_since_to() {
+	printf("yebabo\n");
+	state.size = 0;
+	if (state.msg != NULL) {
+		free(state.msg);
+		state.msg = NULL;
+	}
+	state.byte = 0;
+	state.bit = 0;
+	state.rx_msg = 0;
+	state.rx_size = 0;
+	state.tx = 0;
 }
 
 // how to clean state correctly?
@@ -155,22 +185,27 @@ void rcv_bit(int val) {
 
 //TODO: if pid is not good, we finish work with error
 void ft_sigusr1_hndlr(int sig, siginfo_t *info, void *ucontext) {
+	state.flg = 0;
+	sleep(0.1);
+	// just to not WARN on cc with flags - these args are not used
 	(void)ucontext;
 	(void)sig;
 	//printf("FT SIGUSR1! [%d] from pid [%d]\n", sig, info->si_pid);
 	act(1);
-	//printf("kill from usr1 handler\n");
+	//printf("sending back sigusr1 to client from usr1 handler\n");
 	kill(info->si_pid, SIGUSR1);
-	//printf("killed from usr1 handler\n");
+	//printf("signal sent from usr1 handler\n");
 }
 
 void ft_sigusr2_hndlr(int sig, siginfo_t *info, void *ucontext) {
+	state.flg = 0;
+	sleep(0.1);
 	//printf("FT SIGUSR2! [%d] from pid [%d]\n", sig, info->si_pid);
 	(void)sig;
 	(void)ucontext;
 	act(0);
-	//printf("kill from usr2 handler\n");
+	//printf("sending back sigusr1 to client from usr2 handler\n");
 	kill(info->si_pid, SIGUSR1);
-	//printf("killed from usr2 handler\n");
+	//printf("signal sent from usr2 handler\n");
 }
 
