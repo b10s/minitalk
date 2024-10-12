@@ -14,6 +14,8 @@ void rcv_bit(int val);
 void clean_state_since_to();
 void err(char *msg);
 int rcv_size(int bit);
+size_t ft_strlen(const char *s);
+char * ft_itoa(int n);
 
 
 //TODO remove unsued fields

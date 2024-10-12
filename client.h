@@ -10,3 +10,5 @@ void ack_handler();
 void err_handler();
 void err(char *msg);
 void send_msg(char *msg, int pid);
+size_t ft_strlen(const char *s);
+char * ft_itoa(int n);

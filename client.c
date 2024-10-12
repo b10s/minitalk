@@ -12,17 +12,17 @@ int main(int argc,char** argv) {
 	pid = atoi(argv[1]);
 	msg = argv[2];
 	if (sigemptyset(&usr1_handler.sa_mask) != 0)
-		err("error to set up client");
+		err("error to set up client\n");
 	usr1_handler.sa_flags = SA_RESTART;
 	usr1_handler.sa_handler = ack_handler;
 	if (sigemptyset(&usr2_handler.sa_mask) != 0)
-		err("error to set up client");
+		err("error to set up client\n");
 	usr2_handler.sa_flags = SA_RESTART;
 	usr2_handler.sa_handler = err_handler;
 	if (sigaction(SIGUSR1, &usr1_handler, NULL) != 0)
-		err("error to set up client");
+		err("error to set up client\n");
 	if (sigaction(SIGUSR2, &usr2_handler, NULL) != 0)
-		err("error to set up client");
+		err("error to set up client\n");
 	send_msg(msg, pid);
 }
 
@@ -63,6 +63,6 @@ void ack_handler() {
 
 void err_handler() {
 	sleep(0);
-	err("server responded with err");
+	err("server responded with err\n");
 }
 
