@@ -68,6 +68,12 @@ int main(void) {
 	sigaction(SIGUSR2, &usr2_handler, NULL);
 	for (;;){
 		pause();
+		// send kill to process if all is good
+		// check if errors and send ack or rst
+		//act(state.received_bit);
+		//kill(state.client_pid, 
+		//sleep(0);
+		//kill(state.client_pid, SIGUSR1);
 	}
 }
 
@@ -154,10 +160,13 @@ void rcv_bit(int val) {
 
 //TODO: if pid is not good, we finish work with error
 void ft_sigusr1_hndlr(int sig, siginfo_t *info, void *ucontext) {
-	sleep(0);
+	state.client_pid = info->si_pid;
+	state.received_bit = 1;
+	//sleep(0);
 	// just to not WARN on cc with flags - these args are not used
 	(void)ucontext;
 	(void)sig;
+	sleep(0);
 	//printf("FT SIGUSR1! [%d] from pid [%d]\n", sig, info->si_pid);
 	act(1);
 	//printf("sending back sigusr1 to client from usr1 handler\n");
@@ -167,10 +176,12 @@ void ft_sigusr1_hndlr(int sig, siginfo_t *info, void *ucontext) {
 
 void ft_sigusr2_hndlr(int sig, siginfo_t *info, void *ucontext) {
 	state.client_pid = info->si_pid;
-	sleep(0);
+	state.received_bit = 0;
+	//sleep(0);
 	//printf("FT SIGUSR2! [%d] from pid [%d]\n", sig, info->si_pid);
 	(void)sig;
 	(void)ucontext;
+	sleep(0);
 	act(0);
 	//printf("sending back sigusr1 to client from usr2 handler\n");
 	kill(info->si_pid, SIGUSR1);
