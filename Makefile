@@ -1,10 +1,8 @@
-# diff btw = and := ?
-CC := cc
-CFLAGS := -Wall -Wextra -Werror
+CC = cc
+CFLAGS = -Wall -Wextra -Werror
 
 all: server client
 
-# what are explicit targets like .o .c?
 client:
 	$(CC) $(CFLAGS)	client.c common.c ft_atoi.c -o client
 
@@ -13,6 +11,9 @@ server:
 
 re: fclean all
 
-fclean:
+clean:
+	rm -rf *.o
+
+fclean: clean
 	rm -rf client server
 
