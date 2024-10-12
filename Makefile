@@ -15,3 +15,4 @@ re: fclean all
 
 fclean:
 	rm -rf client server
+

@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <signal.h>
-#include <stdlib.h>
 #include "./server.h"
 
 t_receiver state;

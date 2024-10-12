@@ -4,7 +4,6 @@
 #include <unistd.h>
 size_t ft_strlen(const char *s);
 
-
 void err(char *err_msg) {
 	write(1, err_msg, ft_strlen(err_msg));
 	exit(1);
