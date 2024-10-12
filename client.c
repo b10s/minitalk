@@ -1,10 +1,11 @@
 #include "./client.h"
 
-int main(int argc,char** argv) {
-	int pid;
-	char *msg;
-	struct sigaction usr1_handler;
-	struct sigaction usr2_handler;
+int	main(int argc, char **argv)
+{
+	struct sigaction	usr1_handler;
+	struct sigaction	usr2_handler;
+	char				*msg;
+	int					pid;
 
 	if (argc != 3)
 		err("not enough arguments");
@@ -25,19 +26,22 @@ int main(int argc,char** argv) {
 	send_msg(msg, pid);
 }
 
-void send_msg(char *msg, int pid) {
-	unsigned long byte;
-	int x;
-	unsigned char b;
-	int msg_size;
-	int i;
+void	send_msg(char *msg, int pid)
+{
+	unsigned long	byte;
+	unsigned char	b;
+	int				msg_size;
+	int				i;
+	int				x;
 
 	msg_size = ft_strlen(msg);
-
-	for (byte = 0; byte < sizeof(int); byte++) {
+	byte = 0;
+	while (byte < sizeof(int))
+	{
 		x = (msg_size >> (8*byte)) & 0xff;
 		b = x;
 		send_byte(pid, b);
+		byte++;
 	}
 	for (i = 0; i < msg_size; i++)
 		send_byte(pid, msg[i]);

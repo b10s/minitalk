@@ -2,9 +2,13 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <unistd.h>
-size_t ft_strlen(const char *s);
 
-void err(char *err_msg) {
+static	short	int	ft_detect_sign(int n);
+static	short	int	ft_count_future_len(int n);
+size_t			ft_strlen(const char *s);
+
+void	err(char *err_msg)
+{
 	write(1, err_msg, ft_strlen(err_msg));
 	exit(1);
 }
@@ -21,9 +25,6 @@ size_t
 	}
 	return (res);
 }
-
-static	short	int	ft_detect_sign(int n);
-static	short	int	ft_count_future_len(int n);
 
 char *
 	ft_itoa(int n) {
