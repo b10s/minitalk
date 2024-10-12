@@ -2,9 +2,10 @@
 
 t_receiver	g_state;
 
-int main(void) {
+int	main(void)
+{
 	pid_t	pid;
-	char *pid_str;
+	char	*pid_str;
 
 	g_state.byte = 0;
 	g_state.bit = 0;
@@ -18,15 +19,16 @@ int main(void) {
 	write(1, "\n", 1);
 	free(pid_str);
 	set_sig_handlers();
-	for (;;)
+	while (1)
 		pause();
 }
 
-void set_sig_handlers() {
-	struct sigaction usr1_handler;
-	struct sigaction usr2_handler;
+void	set_sig_handlers(void)
+{
+	struct sigaction	usr1_handler;
+	struct sigaction	usr2_handler;
 
-	if (sigemptyset(&usr1_handler.sa_mask) !=0 )
+	if (sigemptyset(&usr1_handler.sa_mask) != 0)
 		err("error to set up server\n");
 	usr1_handler.sa_flags = SA_SIGINFO | SA_RESTART;
 	usr1_handler.sa_sigaction = ft_sigusr1_hndlr;
@@ -40,9 +42,11 @@ void set_sig_handlers() {
 		err("error to set up server\n");
 }
 
-void clean_state() {
+void	clean_state(void)
+{
 	g_state.size = 0;
-	if (g_state.msg != NULL) {
+	if (g_state.msg != NULL)
+	{
 		free(g_state.msg);
 		g_state.msg = NULL;
 	}
@@ -52,4 +56,3 @@ void clean_state() {
 	g_state.rx_size = 0;
 	g_state.tx = 0;
 }
-
